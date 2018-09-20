@@ -6,7 +6,6 @@ ESP8266WebServer server(80);
 IPAddress ipLocal(192, 168, 1, 241);
 IPAddress gateway(192, 168, 1, 254);
 IPAddress subnet(255, 255, 255, 240);
-IPAddress ipAp;
 
 void createWebServer() {
   server.on("/", []() {
@@ -57,22 +56,18 @@ void createWebServer() {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println();
+  delay(2000);
 
   Serial.print("Setting soft-AP configuration ... ");
-  Serial.println(WiFi.softAPConfig(ipLocal, gateway, subnet) ? "Ready"
-                                                             : "Failed!");
+  // Serial.println(WiFi.softAPConfig(ipLocal, gateway, subnet) ? "Ready"
+  //                                                            : "Failed!");
 
   Serial.print("Setting soft-AP ... ");
   Serial.println(WiFi.softAP("esp-ssid", "kotShpr0t") ? "Ready" : "Failed!");
 
-  ipAp = WiFi.softAPIP();
   Serial.print("Soft-AP IP address = ");
-  Serial.println(ipAp.toString());
+  Serial.println(WiFi.softAPIP().toString());
   createWebServer();
 }
 
-void loop() {
-  Serial.println(ipAp.toString());
-  delay(3000);
-}
+void loop() { server.handleClient(); }
