@@ -3,9 +3,9 @@
 #include <ESP8266WiFi.h>
 
 ESP8266WebServer server(80);
-IPAddress ipLocal(192, 168, 1, 241);
-IPAddress gateway(192, 168, 1, 254);
-IPAddress subnet(255, 255, 255, 240);
+IPAddress ipLocal(10, 0, 1, 1);
+IPAddress gateway(10, 0, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
 
 void createWebServer() {
   server.on("/", []() {
@@ -16,7 +16,7 @@ void createWebServer() {
     if (n < 1) {
       st += "No wifi networks found";
     } else {
-      st += "<select name='ssid'>";
+      st += "<div><select name='ssid'>";
       for (int i = 0; i < n; ++i) {
         String ssid = WiFi.SSID(i);
 
@@ -28,14 +28,17 @@ void createWebServer() {
         st += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
         st += "</option>";
       }
-      st += "</select>";
+      st += "</select></div>";
     }
 
-    content += "<!DOCTYPE HTML>\r\n<html><h1>Cat feeder AP</h1> ";
-    content += "<form method='get' action='setting'><label>SSID:</label>";
+    content += "<!DOCTYPE HTML>\r\n<html><meta charset='UTF-8'><meta name=";
+    content += "'viewport' content='width=device-width, initial-scale=1.0'>";
+    content += "<h1>Cat feeder AP</h1><form method='get' action='setting'>";
+    content += "<p><label>SSID:</label></p>";
     content += st;
-    content += "<input name='pass' length=64><input type='submit'></form>";
-    content += "</html>";
+    content += "<p><label>Password:</label></p><p><input name='pass' length=64";
+    content += "></p><p><input type='submit' value='Connect'></p>";
+    content += "</form></html>";
     server.send(200, "text/html", content);
   });
 
@@ -59,8 +62,8 @@ void setup() {
   delay(2000);
 
   Serial.print("Setting soft-AP configuration ... ");
-  // Serial.println(WiFi.softAPConfig(ipLocal, gateway, subnet) ? "Ready"
-  //                                                            : "Failed!");
+  Serial.println(WiFi.softAPConfig(ipLocal, gateway, subnet) ? "Ready"
+                                                             : "Failed!");
 
   Serial.print("Setting soft-AP ... ");
   Serial.println(WiFi.softAP("esp-ssid", "kotShpr0t") ? "Ready" : "Failed!");
