@@ -4,8 +4,12 @@
 class Storage {
 public:
   void setSsid(String ssid) {
-    for (int i = 0; i < ssid.length(); ++i) {
-      EEPROM.write(i, ssid[i]);
+    for (int i = 0; i < 32; ++i) {
+      if (i < ssid.length()) {
+        EEPROM.write(i, ssid[i]);
+      } else {
+        EEPROM.write(i, LOW);
+      }
     }
 
     EEPROM.commit();
@@ -22,7 +26,13 @@ public:
   }
 
   void setPass(String pass) {
-    for (int i = 0; i < pass.length(); ++i) {
+    for (int i = 0; i < 64; ++i) {
+      if (i < pass.length()) {
+        EEPROM.write(32 + i, pass[i]);
+      } else {
+        EEPROM.write(32 + i, LOW);
+      }
+
       EEPROM.write(32 + i, pass[i]);
     }
 
