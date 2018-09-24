@@ -19,7 +19,11 @@ public:
     String ssid;
 
     for (int i = 0; i < 32; ++i) {
-      ssid += char(EEPROM.read(i));
+      char byte = char(EEPROM.read(i));
+
+      if (byte != LOW) {
+        ssid += byte;
+      }
     }
 
     return ssid;
@@ -43,7 +47,11 @@ public:
     String ssid;
 
     for (int i = 0; i < 64; ++i) {
-      ssid += char(EEPROM.read(32 + i));
+      char byte = char(EEPROM.read(32 + i));
+
+      if (byte != LOW) {
+        ssid += byte;
+      }
     }
 
     return ssid;
