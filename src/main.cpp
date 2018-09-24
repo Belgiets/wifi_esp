@@ -1,55 +1,43 @@
+#include "../lib/RunWiFi.h"
+#include "../lib/Storage.h"
+#include "../lib/WebServerHtml.h"
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 
 ESP8266WebServer server(80);
-IPAddress ipLocal(10, 0, 1, 1);
-IPAddress gateway(10, 0, 1, 1);
-IPAddress subnet(255, 255, 255, 0);
+IPAddress ipAP(10, 0, 1, 1);
+IPAddress ipGateway(10, 0, 1, 1);
+IPAddress subnetMask(255, 255, 255, 0);
+RunWiFi wf(ipAP, ipGateway, subnetMask);
+WebServerHtml html;
+Storage flash;
 
 void createWebServer() {
   server.on("/", []() {
-    String st;
-    String content;
+    String form = html.formWifiCreds();
+    String body = html.body(form, "Cat feeder: WiFi settings");
 
-    int n = WiFi.scanNetworks();
-    if (n < 1) {
-      st += "No wifi networks found";
-    } else {
-      st += "<div><select name='ssid'>";
-      for (int i = 0; i < n; ++i) {
-        String ssid = WiFi.SSID(i);
-
-        st += "<option value='" + ssid + "'>";
-        st += ssid;
-        st += " (";
-        st += WiFi.RSSI(i);
-        st += ")";
-        st += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
-        st += "</option>";
-      }
-      st += "</select></div>";
-    }
-
-    content += "<!DOCTYPE HTML>\r\n<html><meta charset='UTF-8'><meta name=";
-    content += "'viewport' content='width=device-width, initial-scale=1.0'>";
-    content += "<h1>Cat feeder AP</h1><form method='get' action='setting'>";
-    content += "<p><label>SSID:</label></p>";
-    content += st;
-    content += "<p><label>Password:</label></p><p><input name='pass' length=64";
-    content += "></p><p><input type='submit' value='Connect'></p>";
-    content += "</form></html>";
-    server.send(200, "text/html", content);
+    server.send(200, "text/html", body);
   });
 
   server.on("/setting", []() {
     String ssid = server.arg("ssid");
     String pass = server.arg("pass");
 
-    Serial.println(ssid);
-    Serial.println("");
-    Serial.println(pass);
-    Serial.println("");
+    if (ssid.length() > 0) {
+      flash.setSsid(ssid);
+    }
+
+    if (pass.length() > 0) {
+      flash.setPass(pass);
+    }
+
+    Serial.println("ssid");
+    Serial.println(flash.getSsid());
+    Serial.println("pass");
+    Serial.println(flash.getPass());
 
     server.send(200, "text/html", "Server has got config");
   });
@@ -59,17 +47,13 @@ void createWebServer() {
 
 void setup() {
   Serial.begin(115200);
+  EEPROM.begin(128);
   delay(2000);
 
-  Serial.print("Setting soft-AP configuration ... ");
-  Serial.println(WiFi.softAPConfig(ipLocal, gateway, subnet) ? "Ready"
-                                                             : "Failed!");
+  Serial.println(flash.getSsid());
+  Serial.println(flash.getPass());
 
-  Serial.print("Setting soft-AP ... ");
-  Serial.println(WiFi.softAP("esp-ssid", "kotShpr0t") ? "Ready" : "Failed!");
-
-  Serial.print("Soft-AP IP address = ");
-  Serial.println(WiFi.softAPIP().toString());
+  wf.run();
   createWebServer();
 }
 
