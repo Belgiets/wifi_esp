@@ -10,9 +10,9 @@ ESP8266WebServer server(80);
 IPAddress ipAP(10, 0, 1, 1);
 IPAddress ipGateway(10, 0, 1, 1);
 IPAddress subnetMask(255, 255, 255, 0);
-RunWiFi wf(ipAP, ipGateway, subnetMask);
+Storage storage;
+RunWiFi wf(ipAP, ipGateway, subnetMask, storage);
 WebServerHtml html;
-Storage flash;
 
 void createWebServer() {
   server.on("/", []() {
@@ -27,17 +27,12 @@ void createWebServer() {
     String pass = server.arg("pass");
 
     if (ssid.length() > 0) {
-      flash.setSsid(ssid);
+      storage.setSsid(ssid);
     }
 
     if (pass.length() > 0) {
-      flash.setPass(pass);
+      storage.setPass(pass);
     }
-
-    Serial.println("ssid");
-    Serial.println(flash.getSsid());
-    Serial.println("pass");
-    Serial.println(flash.getPass());
 
     server.send(200, "text/html", "Server has got config");
   });
@@ -50,11 +45,10 @@ void setup() {
   EEPROM.begin(128);
   delay(2000);
 
-  Serial.println(flash.getSsid());
-  Serial.println(flash.getPass());
+  Serial.println(WiFi.softAPIP());
 
-  wf.run();
-  createWebServer();
+  // wf.run();
+  // createWebServer();
 }
 
 void loop() { server.handleClient(); }

@@ -1,3 +1,4 @@
+#include "../lib/Storage.h"
 #include <ESP8266WiFi.h>
 
 class RunWiFi {
@@ -5,15 +6,25 @@ private:
   IPAddress ip;
   IPAddress gw;
   IPAddress sm;
+  Storage eeprom;
 
 public:
-  RunWiFi(IPAddress ipAP, IPAddress ipGateway, IPAddress subnetMask) {
+  RunWiFi(IPAddress ipAP, IPAddress ipGateway, IPAddress subnetMask,
+          Storage storage) {
     ip = ipAP;
     gw = ipGateway;
     sm = subnetMask;
+    eeprom = storage;
   };
 
-  void run() {
+  void run() {}
+
+  void connect() {
+    String ssid = eeprom.getSsid();
+    String pass = eeprom.getPass();
+  }
+
+  void runAP() {
     Serial.print("Setting soft-AP configuration ... ");
     Serial.println(WiFi.softAPConfig(ip, gw, sm) ? "Ready" : "Failed!");
 
