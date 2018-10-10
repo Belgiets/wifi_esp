@@ -6,15 +6,12 @@ private:
   IPAddress ip;
   IPAddress gw;
   IPAddress sm;
-  Storage eeprom;
 
 public:
-  RunWiFi(IPAddress ipAP, IPAddress ipGateway, IPAddress subnetMask,
-          Storage storage) {
+  RunWiFi(IPAddress ipAP, IPAddress ipGateway, IPAddress subnetMask) {
     ip = ipAP;
     gw = ipGateway;
     sm = subnetMask;
-    eeprom = storage;
   };
 
   void run() {}

@@ -11,7 +11,7 @@ IPAddress ipAP(10, 0, 1, 1);
 IPAddress ipGateway(10, 0, 1, 1);
 IPAddress subnetMask(255, 255, 255, 0);
 Storage storage;
-RunWiFi wf(ipAP, ipGateway, subnetMask, storage);
+RunWiFi wf(ipAP, ipGateway, subnetMask);
 WebServerHtml html;
 
 void createWebServer() {
