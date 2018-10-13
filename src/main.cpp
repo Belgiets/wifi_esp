@@ -1,9 +1,9 @@
-#include "../lib/WebServerHtml.h"
 #include <Arduino.h>
 #include <CFWiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <Storage.h>
+#include <WSHtml.h>
 
 ESP8266WebServer server(80);
 IPAddress ipAP(10, 0, 1, 1);
@@ -11,7 +11,7 @@ IPAddress ipGateway(10, 0, 1, 1);
 IPAddress subnetMask(255, 255, 255, 0);
 Storage storage;
 CFWiFi wf(ipAP, ipGateway, subnetMask);
-WebServerHtml html;
+WSHtml html;
 
 void createWebServer() {
   server.on("/", []() {
@@ -41,10 +41,6 @@ void createWebServer() {
     server.send(200, "text/html", "Server has got config");
   });
 
-  server.on("/reset", []() {
-
-  });
-
   server.begin();
 }
 
@@ -56,8 +52,6 @@ void setup() {
   String ssid = storage.getSsid();
   String pass = storage.getPass();
 
-  Serial.println(ssid);
-  Serial.println(pass);
   if (ssid.length() > 0) {
     if (wf.connectToAP(ssid, pass)) {
       Serial.println("WiFi connected");
