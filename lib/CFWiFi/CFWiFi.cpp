@@ -22,12 +22,19 @@ void CFWiFi::runAP(void) {
 
 void CFWiFi::stopAP(void) { WiFi.softAPdisconnect(true); };
 
-void CFWiFi::connectToAP(String ssid, String password) {
+bool CFWiFi::connectToAP(String ssid, String password) {
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.begin(ssid.c_str(), password.c_str());
 
-  while (WiFi.status() != WL_CONNECTED) {
+  int c = 0;
+  while (c < 20) {
+    if (WiFi.status() == WL_CONNECTED) {
+      return true;
+    }
     delay(500);
     Serial.print(".");
+    c++;
   }
+
+  return false;
 }

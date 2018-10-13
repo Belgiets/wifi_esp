@@ -14,7 +14,7 @@ public:
   CFWiFi(IPAddress ipAP, IPAddress ipGateway, IPAddress subnetMask);
   void runAP(void);
   void stopAP(void);
-  void connectToAP(String ssid, String password);
+  bool connectToAP(String ssid, String password);
 };
 
 #endif

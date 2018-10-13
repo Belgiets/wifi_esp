@@ -1,17 +1,16 @@
-#include "../lib/RunWiFi.h"
-#include "../lib/Storage.h"
 #include "../lib/WebServerHtml.h"
 #include <Arduino.h>
-#include <EEPROM.h>
+#include <CFWiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
+#include <Storage.h>
 
 ESP8266WebServer server(80);
 IPAddress ipAP(10, 0, 1, 1);
 IPAddress ipGateway(10, 0, 1, 1);
 IPAddress subnetMask(255, 255, 255, 0);
 Storage storage;
-RunWiFi wf(ipAP, ipGateway, subnetMask);
+CFWiFi wf(ipAP, ipGateway, subnetMask);
 WebServerHtml html;
 
 void createWebServer() {
@@ -34,7 +33,16 @@ void createWebServer() {
       storage.setPass(pass);
     }
 
+    if (ssid.length() > 0) {
+      wf.stopAP();
+      wf.connectToAP(ssid, pass);
+    }
+
     server.send(200, "text/html", "Server has got config");
+  });
+
+  server.on("/reset", []() {
+
   });
 
   server.begin();
@@ -42,13 +50,27 @@ void createWebServer() {
 
 void setup() {
   Serial.begin(115200);
-  EEPROM.begin(128);
+  storage.run();
   delay(2000);
 
-  Serial.println(WiFi.softAPIP());
+  String ssid = storage.getSsid();
+  String pass = storage.getPass();
 
-  // wf.run();
-  // createWebServer();
+  Serial.println(ssid);
+  Serial.println(pass);
+  if (ssid.length() > 0) {
+    if (wf.connectToAP(ssid, pass)) {
+      Serial.println("WiFi connected");
+    } else {
+      storage.clear();
+      wf.runAP();
+      Serial.println("Storage was cleared, AP started");
+    }
+  } else {
+    wf.runAP();
+  }
+
+  createWebServer();
 }
 
 void loop() { server.handleClient(); }
