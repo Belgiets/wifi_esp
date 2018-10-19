@@ -1,7 +1,9 @@
 #include <Arduino.h>
 #include <CFWiFi.h>
+#include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
+#include <FBDB.h>
 #include <Storage.h>
 #include <WSHtml.h>
 
@@ -12,6 +14,7 @@ IPAddress subnetMask(255, 255, 255, 0);
 Storage storage;
 CFWiFi wf(ipAP, ipGateway, subnetMask);
 WSHtml html;
+FBDB firebaseDB("cat-feeder-a11ed.firebaseio.com", "actions/feed");
 
 void createWebServer() {
   server.on("/", []() {
@@ -35,6 +38,7 @@ void createWebServer() {
 
     if (ssid.length() > 0) {
       wf.stopAP();
+      Serial.println("AP has been stopped");
       wf.connectToAP(ssid, pass);
     }
 
@@ -54,6 +58,7 @@ void setup() {
 
   if (ssid.length() > 0) {
     if (wf.connectToAP(ssid, pass)) {
+      firebaseDB.begin();
       Serial.println("WiFi connected");
     } else {
       storage.clear();
@@ -67,4 +72,17 @@ void setup() {
   createWebServer();
 }
 
-void loop() { server.handleClient(); }
+void loop() {
+  server.handleClient();
+
+  if (wf.connectionStatus == true) {
+    int feed = firebaseDB.getFeed();
+
+    if (feed == 1) {
+      Serial.println("Cat has been fed");
+      firebaseDB.disableFeed();
+    }
+
+    delay(5000);
+  }
+}

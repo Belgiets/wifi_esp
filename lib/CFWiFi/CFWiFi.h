@@ -15,6 +15,7 @@ public:
   void runAP(void);
   void stopAP(void);
   bool connectToAP(String ssid, String password);
+  bool connectionStatus;
 };
 
 #endif
