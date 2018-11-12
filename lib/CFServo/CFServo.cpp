@@ -1,4 +1,6 @@
 #include "CFServo.h";
+#include <Arduino.h>
+#include <Servo.h>
 
 CFServo::CFServo(int servoPin) { _servoPin = servoPin; };
 
@@ -8,8 +10,14 @@ void CFServo::setup(void) {
 };
 
 void CFServo::feed(void) {
+  Serial.println("run");
   myServo.write(0);
-  delay(2000);
+  delay(1350);
+
+  Serial.println("stop");
   myServo.write(90);
-  delay(2000);
+  //
+  // Serial.println("180 deg");
+  // myServo.write(180);
+  // delay(2000);
 };
