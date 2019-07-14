@@ -1,10 +1,11 @@
 #include <Arduino.h>
-#include <CFServo.h>
 #include <CFWiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <FBDB.h>
+#include <RBD_Timer.h>
+#include <Servo.h>
 #include <Storage.h>
 #include <WSHtml.h>
 
@@ -16,7 +17,12 @@ Storage storage;
 CFWiFi wf(ipAP, ipGateway, subnetMask);
 WSHtml html;
 FBDB firebaseDB("cat-feeder-a11ed.firebaseio.com", "actions/feed");
-CFServo cfServo(4);
+Servo servoEngine;
+int servoEnginePin = 5;
+int loopSensorPin = 4;
+RBD::Timer firebaseTimer(5000);
+RBD::Timer loopTimer(1350);
+int feed = 0;
 
 void createWebServer() {
   server.on("/", []() {
@@ -60,9 +66,13 @@ void setup() {
 
   if (ssid.length() > 0) {
     if (wf.connectToAP(ssid, pass)) {
-      firebaseDB.begin();
-      cfServo.setup();
       Serial.println("WiFi connected");
+
+      Serial.println("Firebase has been configured");
+      firebaseDB.begin();
+
+      servoEngine.attach(servoEnginePin);
+      Serial.println("Servo has been configured");
     } else {
       storage.clear();
       wf.runAP();
@@ -70,23 +80,51 @@ void setup() {
     }
   } else {
     wf.runAP();
+    Serial.println("AP started");
   }
 
   createWebServer();
+  firebaseTimer.restart();
+  loopTimer.restart();
 }
 
 void loop() {
   server.handleClient();
 
-  if (wf.connectionStatus == true) {
-    int feed = firebaseDB.getFeed();
+  // get data from firebase
+  if (firebaseTimer.isExpired()) {
+    if (wf.connectionStatus == true) {
+      feed = firebaseDB.getFeed();
 
-    if (feed == 1) {
-      cfServo.feed();
-      Serial.println("Cat has been fed");
-      firebaseDB.disableFeed();
+      if (feed == 1) {
+        loopTimer.restart();
+
+        Serial.println("Servo has been run");
+        servoEngine.write(0);
+      }
     }
 
-    delay(5000);
+    firebaseTimer.restart();
+  }
+
+  int buttonState = digitalRead(loopSensorPin);
+
+  if (buttonState == HIGH && feed == 1) {
+    // delay for switching sensor
+    delay(150);
+
+    servoEngine.write(90);
+    feed = 0;
+    Serial.println("Terminate loop by sensor");
+
+    firebaseDB.disableFeed();
+  }
+
+  if (loopTimer.isExpired() && feed == 1) {
+    feed = 0;
+    servoEngine.write(90);
+    Serial.println("Terminate loop timer");
+
+    firebaseDB.disableFeed();
   }
 }
