@@ -1,5 +1,6 @@
 #include "FBDB.h"
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <FirebaseArduino.h>
 
 FBDB::FBDB(String firebaseHost, String path) {
