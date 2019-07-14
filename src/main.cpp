@@ -110,6 +110,9 @@ void loop() {
   int buttonState = digitalRead(loopSensorPin);
 
   if (buttonState == HIGH && feed == 1) {
+    // delay for switching sensor
+    delay(150);
+
     servoEngine.write(90);
     feed = 0;
     Serial.println("Terminate loop by sensor");
@@ -124,12 +127,4 @@ void loop() {
 
     firebaseDB.disableFeed();
   }
-
-  // if (buttonState == HIGH || loopTimer.isExpired()) {
-  //   servoEngine.write(90);
-  //   Serial.println("Terminate loop by sensor or loop timer");
-  //
-  //   firebaseDB.disableFeed();
-  //   Serial.println("Cat has been fed");
-  // }
 }
