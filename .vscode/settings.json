@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.linux": {
+        "PATH": "/home/belgiets/.platformio/penv/bin:/home/belgiets/.platformio/penv:/home/belgiets/bin:/home/belgiets/.local/bin:/home/belgiets/.composer/vendor/bin:/home/belgiets/bin:/home/belgiets/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}

@@ -29,28 +29,36 @@ void createWebServer() {
     String form = html.formWifiCreds();
     String body = html.body(form, "Cat feeder: WiFi settings");
 
+    Serial.println("Show settings form");
+
     server.send(200, "text/html", body);
   });
 
   server.on("/setting", []() {
     String ssid = server.arg("ssid");
     String pass = server.arg("pass");
+    String body =
+        html.body("Settings saved. Reset...", "Cat feeder: WiFi settings");
+
+    Serial.println("Saving wifi client settings");
 
     if (ssid.length() > 0) {
+      Serial.println("Saving ssid");
       storage.setSsid(ssid);
     }
 
     if (pass.length() > 0) {
+      Serial.println("Saving pass");
       storage.setPass(pass);
     }
 
     if (ssid.length() > 0) {
-      wf.stopAP();
-      Serial.println("AP has been stopped");
-      wf.connectToAP(ssid, pass);
+      // wf.stopAP();
+      // Serial.println("AP has been stopped");
+      // wf.connectToAP(ssid, pass);
+      server.send(200, "text/html", body);
+      ESP.restart();
     }
-
-    server.send(200, "text/html", "Server has got config");
   });
 
   server.begin();
@@ -95,6 +103,8 @@ void loop() {
   if (firebaseTimer.isExpired()) {
     if (wf.connectionStatus == true) {
       feed = firebaseDB.getFeed();
+
+      Serial.println(feed);
 
       if (feed == 1) {
         loopTimer.restart();

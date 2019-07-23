@@ -3,9 +3,11 @@
 #include <ArduinoJson.h>
 #include <FirebaseArduino.h>
 
-FBDB::FBDB(String firebaseHost, String path) {
+FBDB::FBDB(String firebaseHost, String actionPath) {
   _firebaseHost = firebaseHost;
-  _path = path;
+  _path = actionPath;
+  _statusPath = actionPath + "/status";
+  _updatedPath = actionPath + "/updated";
 };
 
 void FBDB::begin(void) {
@@ -14,7 +16,7 @@ void FBDB::begin(void) {
 };
 
 int FBDB::getFeed(void) {
-  int feed = Firebase.getInt(_path);
+  int feed = Firebase.getInt(_statusPath);
 
   if (Firebase.failed()) {
     Serial.println("Getting data failed");
@@ -24,4 +26,16 @@ int FBDB::getFeed(void) {
   return feed;
 };
 
-void FBDB::disableFeed(void) { Firebase.setInt(_path, 0); };
+void FBDB::disableFeed(void) {
+  DynamicJsonBuffer jsonBuffer;
+
+  JsonObject &feedObject = jsonBuffer.createObject();
+  //JsonObject &timestamp = feedObject.createNestedObject("updated");
+  feedObject["status"] = 0;
+  feedObject["updated"] = "timestamp";
+
+  Firebase.push(_path, feedObject);
+
+  // Firebase.setInt(_statusPath, 0);
+  // Firebase.setString(_updatedPath, serverTimestamp);
+};
