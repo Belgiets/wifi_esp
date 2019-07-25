@@ -22,7 +22,7 @@ String WSHtml::body(String content, String header) {
 String WSHtml::formWifiCreds() {
   String form;
 
-  form = "<form method='get' action='setting'>";
+  form = "<form method='post' action='setting'>";
   form += "<p><label>SSID:</label></p>";
   form += selectSsid();
   form += "<p><label>Password:</label></p>";
