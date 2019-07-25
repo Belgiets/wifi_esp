@@ -8,6 +8,8 @@ class FBDB {
 private:
   String _firebaseHost;
   String _path;
+  String _statusPath;
+  String _updatedPath;
 
 public:
   FBDB(String firebaseHost, String _path);
